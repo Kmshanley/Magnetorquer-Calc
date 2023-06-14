@@ -50,18 +50,12 @@ def get_segment(x1, y1, x2, y2, width, layer, reverse) -> str:
         x1, y1 = y1, x1
         x2, y2 = y2, x2
 
-    if layer == 0:
-        layer = 'F.Cu'
-    elif layer == config.getint("NumberOfLayers")-1:
-        layer = 'B.Cu'
-    else:
-        layer = f"In{layer}.Cu"
+    layer = f"In{layer}.Cu"
 
     return f"(segment (start {x1:.4f} {y1:.4f}) (end {x2:.4f} {y2:.4f}) (width {width:.4f}) (layer {layer}) (net {net}))\n"
 
 
-def save_magnetorquer(exterior_spacing, exterior_num_of_coils,
-                      interior_spacing, interior_num_of_coils):
+def save_magnetorquer(interior_spacing, interior_num_of_coils):
     '''
     Saves the given spiral to "KiCad_spiral.txt".
 
@@ -72,21 +66,15 @@ def save_magnetorquer(exterior_spacing, exterior_num_of_coils,
         interior_num_of_coils: Number of coils per interior layer
     '''
 
-    exterior_width = exterior_spacing - config.getfloat("GapBetweenTraces")
     interior_width = interior_spacing - config.getfloat("GapBetweenTraces")
 
     num_of_layers = config.getint('NumberOfLayers')
 
     out = ""
 
-    out += get_spiral(exterior_spacing,
-                      exterior_num_of_coils, exterior_width, 0)
-    for i in range(num_of_layers-2):
+    for i in range(num_of_layers):
         out += get_spiral(interior_spacing,
                           interior_num_of_coils, interior_width, i+1)
-
-    out += get_spiral(exterior_spacing, exterior_num_of_coils,
-                      exterior_width, num_of_layers-1)
 
     p = Path(__file__).with_name('KiCad_spiral.txt')
     f = open(p, "w")
